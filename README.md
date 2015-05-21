@@ -4,17 +4,24 @@ With this simple library, you can build a [Chrome App](https://developer.chrome.
 
 ## Supported NFC Readers
 
-[ACR122U](http://www.acs.com.hk/en/products/3/acr122u-usb-nfc-reader) | [SCL3711](http://www.identive-group.com/products-and-solutions/identification-products/mobility-solutions/mobile-readers/scl3711-contactless-usb-smart-card-reader)
---- | --- 
-<img src="https://raw.github.com/GoogleChrome/chrome-nfc/master/sample/images/acr122u.png"/> | <img src="https://raw.github.com/GoogleChrome/chrome-nfc/master/sample/images/scl3711.png"/>
+*  [ACR122U](http://www.acs.com.hk/en/products/3/acr122u-usb-nfc-reader)
+*  [SCL3711](http://www.identive-group.com/products-and-solutions/identification-products/mobility-solutions/mobile-readers/scl3711-contactless-usb-smart-card-reader)
+
+## Windows users
+
+To make this plugin work on windows, there are some other additional steps that you have to take:
+
+*  Plug in your reader
+*  Download and open the [Zadig](http://zadig.akeo.ie/) application
+*  Use _Zadig_ to replace the reader's driver with the generic *libusbK*
+*  After this has finished, unplug + replug the reader
+*  Start Chrome with *administrative* rights and you are set to go
 
 ## Play with the Chrome App sample
 
 * Check `Developer Mode` in `chrome://extensions`
 * Click "Load unpacked extension..." in `chrome://extensions` and select the [sample](/sample) folder.
 * Launch it.
-
-<img src="https://raw.github.com/GoogleChrome/chrome-nfc/master/sample/screenshots/1040x811.png"/>
 
 ## Caveats
 
