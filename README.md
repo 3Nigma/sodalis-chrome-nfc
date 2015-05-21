@@ -15,6 +15,7 @@ To make this plugin work on windows, there are some other additional steps that 
 *  Download and open the [Zadig](http://zadig.akeo.ie/) application
 *  Use _Zadig_ to replace the reader's driver with the generic *libusbK*
 *  After this has finished, unplug + replug the reader
+*  Make sure that ```chrome://inspect```'s **Discover USB devices** option is not selected
 *  Start Chrome with *administrative* rights and you are set to go
 
 ## Play with the Chrome App sample
