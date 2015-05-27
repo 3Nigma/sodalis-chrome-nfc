@@ -109,7 +109,7 @@ function NFC() {
             return rc;
           }
           var ndef_obj = new NDEF(ndef);
-          callback(tag_type + ".ndef", ndef_obj);
+          callback(tag_type + ".ndef", UTIL_BytesToHex(tag.tag_id), ndef_obj);
         });
       }, timeout);
     },
