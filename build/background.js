@@ -31,10 +31,13 @@ chrome.runtime.onMessageExternal.addListener(
         isWaitingForTag = true;
         looper = function(tryAttemptsCount) {
           handleDeviceTimeout(readNdefTag, [function(opResult) {
-            if (isWaitingForTag && opResult.found == false && tryAttemptsCount != 0) {
-              looper(tryAttemptsCount - 1);
-            } else {
-              sendResponse(opResult);
+            if (isWaitingForTag) {
+              if (opResult.found == false && tryAttemptsCount != 0) {
+                looper(tryAttemptsCount - 1);
+              } else {
+                sendResponse(opResult);
+                isWaitingForTag = false;
+              }
             }
           }], nfcTagReadTimeoutPerAttemptMs);
         };
@@ -44,6 +47,8 @@ chrome.runtime.onMessageExternal.addListener(
     } else if (request.action == "stop waiting for tag") {
       isWaitingForTag = false;
       sendResponse();
+    } else if (request.action == "is waiting for tag") {
+      sendResponse(isWaitingForTag);
     }
 
     // Handle the response in an async manner
