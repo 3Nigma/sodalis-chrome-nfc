@@ -16,6 +16,7 @@
       <li class="dropdown">
         <a href="#" id="myTabDrop1" class="dropdown-toggle" data-toggle="dropdown">Read <b class="caret"></b></a>
         <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1">
+          <li><a href="#read-tagid" tabindex="-1" data-toggle="tab">Read Tag ID</a></li>
           <li><a href="#read-ndef" tabindex="-1" data-toggle="tab">Read NDEF Tag</a></li>
           <li><a href="#read-mifare" tabindex="-1" data-toggle="tab">Read Mifare Classic Tag</a></li>
         </ul>
@@ -41,6 +42,10 @@
           <dd id="device-product-id"></dd>
           <button id="search_for_readers">Search for readers</button>
         </dl>
+      </div>
+      <div class="tab-pane" id="read-tagid">
+        <pre></pre>
+        <button type="button" class="btn btn-default">Run</button>
       </div>
       <div class="tab-pane" id="read-ndef">
         <pre></pre>

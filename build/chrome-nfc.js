@@ -627,6 +627,17 @@ function NFC() {
         console.debug("device.onclose() is called.");
       });
     }, 1E3);
+  }, "read_tag_id":function(device, options, cb) {
+    var timeout = options["timeout"];
+    var callback = cb;
+    wait_for_passive_target(device, function(rc, tag_type, tag_id) {
+      var tag = new Tag(tag_type, tag_id);
+      if (!tag) {
+        console.log("nfc.read: unknown tag_type: " + tag_type);
+        return;
+      }
+      callback(tag_type, UTIL_BytesToHex(tag.tag_id));
+    }, timeout);
   }, "read":function(device, options, cb) {
     var timeout = options["timeout"];
     var callback = cb;

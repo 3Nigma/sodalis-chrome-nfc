@@ -77,6 +77,29 @@ function NFC() {
     },
 
     /*
+     * Read only the ID of the tag ignoring the tag's content.
+     *
+     *  'options' is a dictionary with optional parameters. If a parameter is
+     *  missed, a default value is applied. Options include:
+     *
+     *    'timeout': timeout for this operation. Default: infinite
+     */
+    "read_tag_id": function(device, options, cb) {
+      var timeout = options["timeout"];
+      var callback = cb;
+
+      wait_for_passive_target(device, function(rc, tag_type, tag_id) {
+          var tag = new Tag(tag_type, tag_id);
+          if (!tag) {
+              console.log("nfc.read: unknown tag_type: " + tag_type);
+              return;
+          }
+
+          callback(tag_type, UTIL_BytesToHex(tag.tag_id));
+      }, timeout);
+    },
+
+    /*
      *  Read a tag.
      *
      *  'options' is a dictionary with optional parameters. If a parameter is
@@ -87,7 +110,7 @@ function NFC() {
      *                  However, currently only tag 2 and NDEF is supported.
      *
      *  'cb' lists callback functions for particular tag contents.
-     *  When called, 2 parameters are given: 'type' and 'content'.
+     *  When called, 3 parameters are given: 'type', 'tag id' and 'content'.
      *  'type' indicates the tag type detected in the hierarchical form, ex:
      *  "tt2.ndef". Then 'content' is the NDEF object.
      */
