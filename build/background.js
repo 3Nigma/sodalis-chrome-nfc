@@ -19,18 +19,18 @@ chrome.runtime.onMessageExternal.addListener(
         search_for_device : {
           timeout: deviceSearchTimeoutMs
         },
-        read_tag : {
+        read_tag_id : {
           attempts: nfcTagReadAttempts,
           timeout: nfcTagReadTimeoutPerAttemptMs
         }
       });
     } else if (request.action == "find reader") {
       handleDeviceTimeout(enumerateDevices, [sendResponse], deviceSearchTimeoutMs);
-    } else if (request.action == "wait for tag") {
+    } else if (request.action == "wait for tag id") {
       if (isWaitingForTag == false) {
         isWaitingForTag = true;
         looper = function(tryAttemptsCount) {
-          handleDeviceTimeout(readNdefTag, [function(opResult) {
+          handleDeviceTimeout(readTagId, [function(opResult) {
             if (isWaitingForTag) {
               if (opResult.found == false && tryAttemptsCount != 0) {
                 looper(tryAttemptsCount - 1);
@@ -44,10 +44,10 @@ chrome.runtime.onMessageExternal.addListener(
 
         looper(nfcTagReadAttempts);
       }
-    } else if (request.action == "stop waiting for tag") {
+    } else if (request.action == "stop waiting for tag id") {
       isWaitingForTag = false;
       sendResponse();
-    } else if (request.action == "is waiting for tag") {
+    } else if (request.action == "is waiting for tag id") {
       sendResponse(isWaitingForTag);
     }
 
@@ -69,8 +69,8 @@ function handleDeviceTimeout(func, args, timeoutInMs) {
   func.apply(this, args);
 }
 
-function readNdefTag(rCb, callback) {
-  chrome.nfc.read(device, {}, function(type, tid, ndef) {
+function readTagId(rCb, callback) {
+  chrome.nfc.read_tag_id(device, {}, function(type, tid) {
     rCb({
       found: true,
       tag: {
