@@ -16,12 +16,16 @@
   ],
 
   "externally_connectable": {
-    "matches": ["*://*.sodalis.it/*", "*://sodalis.it/*"]
+    "matches": ["*://*.sodalis.it/*", "*://sodalis.it/*", "*://*.rrsolutions.ro/*"]
   },
 
   "app": {
     "background": {
       "scripts": [ "chrome-nfc.js", "background.js" ]
     }
-  }
+  },
+
+  "key" : "cmfdpjglghpfoljbnhambckdflbkmfnc",
+
+  "icons":{ "48": "nfc-icon-48.png", "128": "nfc-icon-128.png"}
 }
