@@ -119,7 +119,7 @@ A minimum DOM environment might look similar to this:
     <script src="js/jquery-2.1.3.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/bootstrap-dialog/bootstrap-dialog.min.js"></script>
-    <script src="<?= base_url('application/assets/js/usb-nfc.js') ?>"></script>
+    <script src="js/usb-nfc.js"></script>
   </head>
   <body>
    <!-- ... -->
