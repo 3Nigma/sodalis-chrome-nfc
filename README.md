@@ -1,15 +1,97 @@
-# Chrome App NFC Library
+# Sodalis Chrome NFC Library
 
-With this simple library, you can build a [Chrome App](https://developer.chrome.com/apps) that communicates over USB with NFC Readers.
+What if I told you that you can make a *webpage* read a [NFC](https://en.wikipedia.org/wiki/Near_field_communication) tag?
 
-## Supported NFC Readers
+That you can have your client load a site with the following piece of JS code delivering what it (semantically) promises? :
+``` javascript
+  var usbNfcLink = new UsbNFC();
 
-*  [ACR122U](http://www.acs.com.hk/en/products/3/acr122u-usb-nfc-reader)
-*  [SCL3711](http://www.identive-group.com/products-and-solutions/identification-products/mobility-solutions/mobile-readers/scl3711-contactless-usb-smart-card-reader)
+  usbNfcLink.readTag(function (tagResp) {
+    // USB reader found a tag
+    // Do something with its ID (tagResp.id)
+  });  
+```
 
-## Windows users
+And that you would have something like this on your website:
 
-To make this plugin work on windows, there are some other additional steps that you have to take:
+<img src="https://raw.github.com/3Nigma/sodalis-chrome-nfc/master/img/sodalis-nfc-noh-capture.gif"/>
+
+This is actually an, NFC based, office working-hours tracking system.
+
+Now, I have to admit that there is a list of prerequisites to have before making this possible:
+
+* an external USB reader (see 'Supported NFC Readers' further down)
+* a chrome extension (yes, this means that, for now at least, only Chrome users can make this happen) 
+* a client-side JS libray
+
+Having these available, *you can* make your page NFC aware all through the confort of our beloved JavaScript logic.
+
+Now that I've cought your attention, lets see how we can accomplish this.
+
+## Working Description ##
+
+At the core of my solution you'll find Chrome's [USB system service](https://developer.chrome.com/apps/app_usb) that Google made available for their platform apps. A while back, the guys at Google [showed how a Chrome app can read a NFC tag](https://github.com/GoogleChrome/chrome-nfc) through one of these external USB-NFC devices.  
+
+Having a Chrome app communicate with a USB peripheral was a cool thing by itself, but the immediate question that popped into my mind was: What if we can leverage the availability of this feature to ordinary pages? Wouldn't that be *more* awsome? 
+
+The [crome-nfc code](https://github.com/GoogleChrome/chrome-nfc) was a good place to start, but since Chrome Apps have their own isolated container where they run their code, the challenge came down to finding a way to bridge an app's restricted environment with a client webpage. It turned out that you can accomplish this if you use [their messaging system](https://developer.chrome.com/extensions/messaging#external-webpage). In other words, you can comunicate between a web page and a chrome app. For security/privacy considerations though, this data link is subjected to some conditions which we'll discuss a little bit later.
+
+Having this sorted, it was only a matter of making the infrastructure + code to allow it to happen.
+
+## How to use? ##
+
+Ok, enough chit-chat. Lets get down to some using. First download the repository. Having it downloaded, you will find that it has a simple structure:
+
+```
+  src            : holds the sources
+    * -- app     : chrome app related
+    * -- client  : website related
+  build          : holds the outputed, condensed artifacts
+    * -- app     : chrome app related
+    * -- client  : website related
+```
+
+Unless you are not interested in participating to the coding effort (by the way, did I mention that I'm looking forward for your pull requests?) then you should only be interested in the ```build``` part.
+
+### Adding the chrome extension ###
+
+First, you will need to edit the ```build/app/manifest.js```. Open it and search for this region:
+
+```
+"externally_connectable": {
+  "matches": ["*://*.sodalis.it/*", "*://sodalis.it/*", "*://*.rrsolutions.ro/*"]
+}
+```
+
+To be able to have a data communication channel opened between your site and the chrome extension, you would have to inform chrome that you trust the requests that come from your domain. To do this, simply redefine the ```matches``` array. So, for example, if your domain is ```google.com``` and you would like the chrome extension to communicate with this domain (and all its subdomains), your ```externally_connectable``` value would look something like:
+
+```
+"externally_connectable": {
+  "matches": ["*://*.google.com/*", "*://google.com/*"]
+}
+```
+
+Please keep in mind that you have to have a second-level domain name specified. Matches having the form ```*.com``` are not allowed (pitty!). It is for this reason that we cannot have it hosted on their App store. Otherwise we could have included a long list of all the most commonly used, first-level domain filters.
+
+Having this done, we are ready to add the extension to Chrome.
+
+Navigate to ```chrome://extensions``` and enable ```Developer mode```.
+
+<img src="https://raw.github.com/3Nigma/sodalis-chrome-nfc/master/img/chrome_extensions_dev_mode.png"/>
+
+Then click the ```Load unpacked extension...``` button. Navigate to where you have extracted the git repository and select the ```build/app``` folder.
+
+<img src="https://raw.github.com/3Nigma/sodalis-chrome-nfc/master/img/chrome_extensions_ld_unpacked_extension.png"/>
+
+You should see the ```Sodalis USB-NFC``` extension listed:
+
+<img src="https://raw.github.com/3Nigma/sodalis-chrome-nfc/master/img/chrome_extensions_extension_added.png"/>
+
+Now would be the time to plugin your external reader and check to see if the chrome extension is capable of comunicating with it. You do this by clicking the extension's ```Launch``` link which will popup [chrome-nfc](https://github.com/GoogleChrome/chrome-nfc)'s original *API Sample* window. If you're running on Linux, then you can click the ```Search for readers``` button and you would probably have your reader immediatelly listed:
+
+<img src="https://raw.github.com/3Nigma/sodalis-chrome-nfc/master/img/chrome_extensions_reader_found.png"/>
+
+Windows users will have to put a little bit more effort into this (thank you, Micro$oft). Here is the list of steps required to make the plugin work on Windows (taken from the [chrome-nfc](https://github.com/GoogleChrome/chrome-nfc) repo):
 
 *  Plug in your reader
 *  Download and open the [Zadig](http://zadig.akeo.ie/) application
@@ -18,133 +100,69 @@ To make this plugin work on windows, there are some other additional steps that 
 *  Make sure that ```chrome://inspect```'s **Discover USB devices** option is not selected
 *  Start Chrome with *administrative* rights and you are set to go
 
-## Play with the Chrome App sample
+I've noticed that the last step is not required for me, but I've included it for completion.
 
-* Check `Developer Mode` in `chrome://extensions`
-* Click "Load unpacked extension..." in `chrome://extensions` and select the [sample](/sample) folder.
-* Launch it.
+Once this is up and running, we can shift our attention now to the client webpage.
 
-## Caveats
+### Working with the client library ###
 
-Learn more about USB Devices Caveats at https://developer.chrome.com/apps/app_usb#caveats
+You will find the library in ```build/client/usb-nfc.js```. There isn't too much to say about it except for the fact that it requires both [jQuery](https://jquery.com/) [2.x should be fine] and nakupanda's beautifully crafted [bootstrap3-dialog](https://github.com/nakupanda/bootstrap3-dialog).
 
-## Usage
+A minimum DOM environment might look similar to this:
 
-Once you've imported the [chrome-nfc.js](https:///raw.github.com/GoogleChrome/chrome-nfc/master/sample/chrome-nfc.js) javascript library into your Chrome App, you need to add the permissions below to your manifest file:
+``` html
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-dialog.min.css">
 
-```javascript
-"permissions": [
-  "usb",
-  {
-    "usbDevices": [
-      { "vendorId": 1254, "productId": 21905 }, // SCL3711
-      { "vendorId": 1839, "productId": 8704 }   // ACR122U
-    ]
-  }
-]
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-dialog/bootstrap-dialog.min.js"></script>
+    <script src="<?= base_url('application/assets/js/usb-nfc.js') ?>"></script>
+  </head>
+  <body>
+   <!-- ... -->
+  </body>
+</html>
 ```
 
-### Enumerate NFC readers
+To read tags, you would have to create an ```UsbNFC``` object within your JavaScript logic and invoke its ```readTag``` function passing a callback for the response. It's as simple as that. No options, no settings, no code dependencies (although future might change this). It just works!
 
 ``` javascript
-chrome.nfc.findDevices(function(devices) {
-  console.log("Found " + devices.length + " NFC device(s)");
-  for (var i = 0; i < devices.length; i++) {
-    var device = devices[i];
-    console.log(device.vendorId, device.productId);
-  }
-});
+var usbNfcLink = new UsbNFC();
+
+usbNfcLink.readTag(function (tagResp) {
+  // USB reader found a tag
+  // Do something with its ID (tagResp.id)
+}); 
 ```
 
-### Read NFC tag
+For now, the ```tagResp``` object only has one property:
 
-``` javascript
-chrome.nfc.findDevices(function(devices) {
-  var device = devices[0];
-  chrome.nfc.read(device, {}, function(type, ndef) {
-    console.lof(ndef);
-    var uri = ndef.ndef[0]["uri"];
-    console.log(uri);
-    var text = ndef.ndef[1]["text"];
-    console.log(text);
-  });
-});
-```
+* ```id``` - a hexadecimal string representing the ID of the aquired tag
 
-### Write NFC tag
+## Supported NFC Readers ##
 
-``` javascript
-chrome.nfc.findDevices(function(devices) {
-  var device = devices[0];
-  var ndef = [
-    {"text": "Chromium.org website" },
-    {"uri": "http://chromium.org" },
-    {"aar": "com.google.samples.apps.iosched" },
-  ];
-  chrome.nfc.write(device, {"ndef": ndef}, function(rc) {
-    if (!rc) {
-      console.log("WRITE() success!");
-    } else {
-      console.log("WRITE() FAILED, rc = " + rc);
-    }
-  });
-});
-```
+*  [ACR122U](http://www.acs.com.hk/en/products/3/acr122u-usb-nfc-reader)
+*  [SCL3711](http://www.identive-group.com/products-and-solutions/identification-products/mobility-solutions/mobile-readers/scl3711-contactless-usb-smart-card-reader)
 
-### Emulate NFC tag
-
-``` javascript
-chrome.nfc.findDevices(function(devices) {
-  var device = devices[0];
-  var ndef = [
-    {"type": "URI", "uri": "http://chromium.org"}
-  ];
-  chrome.nfc.emulate_tag(device, {"ndef": ndef}, function(rc) {
-    if (!rc) {
-      console.log("EMULATE() success!");
-    } else {
-      console.log("EMULATE() FAILED, rc = " + rc);
-    }
-  });
-});
-```
-
-### Read Mifare Classic tag (Logic Mode)
-
-``` javascript
-chrome.nfc.findDevices(function(devices) {
-  var device = devices[0];
-  chrome.nfc.read_logic(device, 0, 2, function(rc, data) {
-    console.log(UTIL_BytesToHex(data));
-  });
-});
-```
-
-### Write Mifare Classic tag (Logic Mode)
-
-``` javascript
-chrome.nfc.findDevices(function(devices) {
-  var device = devices[0];
-  var data = new Uint8Array([ // NDEF(http://google.com)
-    0xdb, 0x00, 0x03, 0xe1, 0x00, 0x00, 0x00, 0x00, // block 0 (MAD1)
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // block 1 (MAD1)
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x03, 0x0f, 0xd1, 0x01, 0x0b, 0x55, 0x03, 0x67, // block 2 (NDEF)
-    0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x63, 0x6f,
-    0x6d, 0xfe, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // block 3 (NDEF)
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  ]);
-  chrome.nfc.write_logic(device, 0, data, function(rc) {
-    console.log("WRITE_LOGIC() SUCCESS");
-  });
-});
-```
+Apart from these, work is underway to have ACS's ACR1252 also compatible. Though I don't have an exact date when that might happen.
 
 ## Compiling the library
 
-Compiling script requires [Python 3.0](http://www.python.org/download/releases/3.0/) and will use online [Closure Compiler](https://developers.google.com/closure/). Just run
+Compiling scripts requires [Python 3.0](http://www.python.org/download/releases/3.0/) and will use online [Closure Compiler](https://developers.google.com/closure/). Just run
 
-    python3 compile.py
+    python3 compile-app.py
+    python3 compile-client.py
 
-and the library will be written to `chrome-nfc.js`.
+and, hopefully, 2 things will happen : 
+
+* the chrome core library will be written to `build/app/chrome-nfc.js` _while_
+* the JS client library will be written to `build/client/usb-nfc.js`.
+
+## TODOs ##
+
+* Add option to go quiet with the logs
+* Add option to bypass the jQuery/BootstrapDialog dependencies if required
+* Deliver more data in the ```tagResp``` object
