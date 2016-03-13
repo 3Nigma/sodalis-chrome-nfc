@@ -8,7 +8,7 @@ import urllib.request
 
 BASE_DIR = os.path.dirname(sys.argv[0])
 CLOSURE_URL = 'http://closure-compiler.appspot.com/compile'
-TARGET_JS = os.path.join(BASE_DIR, 'build', 'chrome-nfc.js')
+TARGET_JS = os.path.join(BASE_DIR, 'build/app', 'chrome-nfc.js')
 
 def print_errors(errors, js_files):
   for error in errors:
@@ -27,17 +27,17 @@ def print_errors(errors, js_files):
 
 
 JS_FILES = [
-  'src/b64.js',
-  'src/mifare-classic.js',
-  'src/ndef.js',
-  'src/nfc.js',
-  'src/devmanager.js',
-  'src/scl3711.js',
-  'src/sha256.js',
-  'src/tag.js',
-  'src/tt2.js',
-  'src/usb.js',
-  'src/util.js'
+  'src/app/b64.js',
+  'src/app/mifare-classic.js',
+  'src/app/ndef.js',
+  'src/app/nfc.js',
+  'src/app/devmanager.js',
+  'src/app/scl3711.js',
+  'src/app/sha256.js',
+  'src/app/tag.js',
+  'src/app/tt2.js',
+  'src/app/usb.js',
+  'src/app/util.js'
 ]
 
 def main():
